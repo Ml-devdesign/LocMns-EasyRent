@@ -1,0 +1,7 @@
+RewriteEngine On
+<!-- Active les regle de reecriture  -->
+<Files "config.php">
+Order Allow,Deny 
+Deny from all 
+</Files>
+<!-- Ce fichier empeche l'acce au fichier config.php via le nav Web  -->

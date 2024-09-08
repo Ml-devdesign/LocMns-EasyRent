@@ -1,0 +1,202 @@
+/* Styles généraux */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+/* Bannière */
+.banner {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.banner-text {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.banner h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.banner p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary {
+    background-color: #ff5722;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #4caf50;
+    color: white;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+/* Section de recherche */
+.search-section {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.search-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.search-input {
+    width: 300px;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 5px 0 0 5px;
+    outline: none;
+    font-size: 1em;
+}
+
+.search-button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #ff5722;
+    color: white;
+    border-radius: 0 5px 5px 0;
+    cursor: pointer;
+}
+
+.search-button:hover {
+    background-color: #e64a19;
+}
+
+/* Section des annonces */
+.featured-ads, .latest-ads {
+    margin: 40px 0;
+}
+
+.featured-ads h2, .latest-ads h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #ff5722;
+}
+
+.ads-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.ad-item {
+    background-color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.ad-image {
+    width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.ad-title {
+    font-size: 1.5em;
+    margin: 15px 0 10px;
+    color: #333;
+}
+
+.ad-description {
+    font-size: 1em;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+/* Tags populaires */
+.popular-tags {
+    margin: 40px 0;
+    text-align: center;
+}
+
+.popular-tags h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+    color: #ff5722;
+}
+
+.tags-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tag {
+    padding: 10px 20px;
+    background-color: #e0e0e0;
+    border-radius: 20px;
+    text-decoration: none;
+    color: #333;
+    font-size: 1em;
+}
+
+.tag:hover {
+    background-color: #bdbdbd;
+}
+
+/* Appel à l'action */
+.call-to-action {
+    background-color: #4caf50;
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    border-radius: 5px;
+    margin: 40px 0;
+}
+
+.call-to-action h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+.call-to-action p {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+}
+
+.call-to-action .btn-primary {
+    background-color: white;
+    color: #4caf50;
+}
+
+.call-to-action .btn-primary:hover {
+    background-color: #f1f1f1;
+}

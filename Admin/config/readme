@@ -1,0 +1,7 @@
+<!-- Fichier placer la pour empecher l'acces du coté publique a l'exterieur du index.html 
+je definit ensuite les variable de connection dans le fichier config.php  car elles sont sensible 
+puis je cree le fichier dans le dossier include le connect.php avec a l'interrieur les variable de co et 
+jy inclu le config/config.php 
+et ensuite jutilise un fichier .htacess pour empecher l'acccces direct au fichier config.php 
+Ce qui me permet de gerer la config de maniere sécu et organisee sans avoir recour a des solution externe comme des biblihoteque 
+ca me permet de garder une achi simple et facile a maintenir  -->

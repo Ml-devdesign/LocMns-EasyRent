@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             Admin_booleen = ?, 
             consent_date = ?,
             deletion_date =?,
-            Authorisation_id = ?
+            Authorisation_id = ?,
             WHERE Customer_id = ?";
     $stmt = $db->prepare($sql);
     $stmt->execute([

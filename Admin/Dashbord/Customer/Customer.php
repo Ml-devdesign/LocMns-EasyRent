@@ -14,7 +14,7 @@ try {
     }
 
     // Calcul du nombre total de clients
-    $stmt = $db->query("SELECT COUNT(*) FROM customer");
+    $stmt = $db->query("SELECT COUNT(*) FROM customer WHERE Customer_lastName != 'Anonyme'");
     $totalCustomers = $stmt->fetchColumn();
     $totalPages = ceil($totalCustomers / $perPage); // Nombre total de pages
     if ($currentPage > $totalPages) {
@@ -26,11 +26,13 @@ try {
     // Recherche de clients
     $searchTerm = isset($_GET['search']) ? "%".$_GET['search']."%" : null;
     if ($searchTerm) {
-        $sql = "SELECT * FROM customer WHERE Customer_lastName LIKE :Customer_lastName LIMIT :start, :perPage";
+        // Ajout de la condition pour exclure les clients anonymes lors de la recherche
+        $sql = "SELECT * FROM customer WHERE Customer_lastName LIKE :Customer_lastName AND Customer_lastName != 'Anonyme' LIMIT :start, :perPage";
         $stmt = $db->prepare($sql);
         $stmt->bindParam(':Customer_lastName', $searchTerm, PDO::PARAM_STR);
     } else {
-        $sql = "SELECT * FROM customer LIMIT :start, :perPage";
+        // Ajout de la condition pour exclure les clients anonymes lors de l'affichage normal
+        $sql = "SELECT * FROM customer WHERE Customer_lastName != 'Anonyme' LIMIT :start, :perPage";
         $stmt = $db->prepare($sql);
     }
 
@@ -58,6 +60,27 @@ if (empty($customers)) {
 </form>
 <!-- Fin du moteur de recherche -->
 
+<!-- Pagination for Customer -->
+<nav class="pagination-nav">
+    <?php 
+    $urlParams = $_GET; // Récupère les paramètres actuels de l'URL
+    if ($currentPage > 1) {
+        $urlParams['page'] = $currentPage - 1;
+        echo '<a class="btn prev" href="?' . http_build_query($urlParams) . '">&laquo; Précédent</a>';
+    }
+    for ($page = 1; $page <= $totalPages; $page++) {
+        $urlParams['page'] = $page;
+        $activeClass = ($page == $currentPage) ? 'active' : '';
+        echo '<a class="btn page ' . $activeClass . '" href="?' . http_build_query($urlParams) . '">' . $page . '</a>';
+    }
+    if ($currentPage < $totalPages) {
+        $urlParams['page'] = $currentPage + 1;
+        echo '<a class="btn next" href="?' . http_build_query($urlParams) . '">Suivant &raquo;</a>';
+    }
+    ?>
+</nav>
+<!-- Fin de la pagination -->
+
 <?php 
 
 // Affichage des clients ou message si aucun client n'est trouvé
@@ -68,39 +91,24 @@ foreach ($customers as $customer) { ?>
             <div class="banner-image"></div>
             <h1>Prenom : <?= htmlspecialchars($customer['Customer_firstName'], ENT_QUOTES, 'UTF-8') ?></h1>
             <h1>Nom : <?= htmlspecialchars($customer['Customer_lastName'], ENT_QUOTES, 'UTF-8') ?></h1>
-                    <!-- <?php var_dump($customer['consent_date']);  // Cela doit afficher une date au format 'YYYY-MM-DD'
-                    var_dump($customer['deletion_date']);
-                    ?>
-                    // Verificataion de la recuperation des dates 
-                    -->
+            <!-- Verificataion de la recuperation des dates -->
             <div class="button-wrapper open-modal-btn-wrapper">
                 <a class="btn outline" data-type="customer" data-id="<?= htmlspecialchars($customer['Customer_id'], ENT_QUOTES, 'UTF-8') ?>">Modifier</a>
             </div>
-            <!--  Bug  : Les liens <a> envoient des requêtes en GET donc le button delete ne fonctionner pas 
-            <div class="button-wrapper">
-                <a class="btn fill" data-id="<?= htmlspecialchars($customer['Customer_id'], ENT_QUOTES, 'UTF-8') ?>">Supprimer</a><!--ajouter un popup : Supprimer le client et toutes ses données pour valider 
-            </div>
-            -->
-
+            
             <!-- Formulaire de l'anonymisation ou suppresion -->
-            <!-- Bug : Le formulaire de suppression ne fonctionne pas correctement, il ne supprime pas les données du client et de la table customer_address 
-            Test: Si la recuperation de données du client est correcte, 
-                si la case à cocher pour l'anonymisation est cochée, 
-                si la case à cocher pour la suppression de toutes les données est cochée, 
-                si la requête SQL pour l'anonymisation et la suppression de toutes les données est correcte : 
-                    Vérifiez que les données sont bien envoyées via POST :
-                    var_dump($_POST); manque la clé 'checkbox' qui devrait être présente pour confirmer l'anonymisation. , 
-                si la redirection après la suppression est correcte  : Page blanche a la suppression
-            -->
             <form action="/Admin/Dashbord/Customer/delete.php" method="POST">
-                <input type="hidden" name="id" value="<?= htmlspecialchars($customer['Customer_id'], ENT_QUOTES, 'UTF-8') ?>">
-                <label>
-                    <input type="checkbox" name="checkbox" value="1" required> Confirmer l'anonymisation
-                </label>
-                <label>
-                    <input type="checkbox" name="checkboxDeleteAll" value="1"> Supprimer toutes les données
-                </label>
-                <button type="submit" class="btn fill">Supprimer</button>
+                <div class="button-wrapper">  
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($customer['Customer_id'], ENT_QUOTES, 'UTF-8') ?>">
+                    <label>
+                        <input type="checkbox" name="checkbox" value="1" required> Confirmer l'anonymisation
+                    </label>
+                    <label>
+                        <input type="checkbox" name="checkboxDeleteAll" value="1"> Supprimer toutes les données
+                    </label>
+                    <!-- Bouton qui ouvre le modal de confirmation -->
+                    <button type="button" class="btn fill open-delete-modal" data-id="<?= htmlspecialchars($customer['Customer_id'], ENT_QUOTES, 'UTF-8') ?>">Supprimer</button> 
+                </div>
             </form>
 
         </div>
@@ -117,18 +125,18 @@ foreach ($customers as $customer) { ?>
             </div>
         </div>
     </div>
-    <?php }
-    } else {
+<?php }
+} else {
     echo 'Aucun client trouvé.';
 }
 ?>
 
-    <!-- Modal de confirmation -->
+ <!-- Modal de confirmation -->
     <div id="delete-modal" class="modal" style="display: none;">
         <div class="modal-content">
             <h2>Confirmer la suppression</h2>
             <p>Êtes-vous sûr de vouloir anonymiser et supprimer les données de ce client ?</p>
-            <form action="/path/to/delete.php" method="POST" id="delete-form">
+            <form action="/Admin/Dashbord/Customer/delete.php" method="POST" id="delete-form">
                 <input type="hidden" name="id" id="delete-id">
                 <label>
                     <input type="checkbox" name="checkbox" value="1"> Confirmer l'anonymisation
@@ -141,22 +149,6 @@ foreach ($customers as $customer) { ?>
             <button class="close-modal">Annuler</button>
         </div>
     </div>
-
-<!-- JS pour le Modal de confirmation -->
-<script>
-document.querySelectorAll('.open-delete-modal').forEach(button => {
-    button.addEventListener('click', function() {
-        const customerId = this.getAttribute('data-id');
-        document.getElementById('delete-id').value = customerId;
-        document.getElementById('delete-modal').style.display = 'block';
-    });
-});
-
-document.querySelector('.close-modal').addEventListener('click', function() {
-    document.getElementById('delete-modal').style.display = 'none';
-});
-</script>
-
 
 <!-- Pagination for Customer -->
 <nav class="pagination-nav">

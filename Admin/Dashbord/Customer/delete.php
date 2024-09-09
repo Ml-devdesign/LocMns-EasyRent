@@ -3,8 +3,8 @@ include $_SERVER["DOCUMENT_ROOT"] . "/Include/Protect.php";
 require_once __DIR__ . '/../../include/Connect.php';
 
 // Afficher les données POST pour le débogage
-var_dump($_POST);
-exit();
+// var_dump($_POST);
+// exit();
 // Sortie
 // Résolution du problème
 // Vérifiez que les données sont bien envoyées via POST :
@@ -38,7 +38,7 @@ if (isset($_POST['id']) && is_numeric($_POST['id'])) {
             // Exécution de la requête et redirection
             if ($stmt->execute()) {
                 echo "Client anonymisé et supprimé avec succès.";
-                header('Location:/Admin//index.php?success=customer_deleted');
+                header('Location:/Admin/index.php?success=customer_deleted');
                 exit();
             } else {
                 echo "Erreur lors de l'anonymisation et suppression des données du client.";

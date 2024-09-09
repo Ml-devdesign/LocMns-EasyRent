@@ -2,6 +2,20 @@ document.addEventListener("DOMContentLoaded", function () {
   // Fonction générique pour ouvrir un modal
   function openModal(modalType, id) {
     const modal = document.getElementById(`${modalType}-modal-${id}`);
+
+    // Si le type est 'delete', ouvrir le modal de suppression générique
+    if (modalType === "delete") {
+      const deleteModal = document.getElementById("delete-modal"); // Récupère le modal de confirmation de suppression
+      if (deleteModal) {
+        document.getElementById("delete-id").value = id; // Définit l'ID du client dans le formulaire du modal
+        deleteModal.style.display = "block"; // Affiche le modal de confirmation de suppression
+      } else {
+        console.error("Modale de suppression introuvable.");
+      }
+      return; // On arrête ici pour ne pas continuer le traitement des autres types
+    }
+
+    // Si le modal est trouvé, l'afficher
     if (modal) {
       modal.style.display = "block";
       const modalForm = modal.querySelector("form");
@@ -18,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
-  // Ajoute un écouteur sur les boutons d'ouverture du modal (Customer, Product, Reservation)
+  // Ajoute un écouteur sur les boutons d'ouverture du modal (Customer, Product, Reservation, Delete)
   document.querySelectorAll("[data-type]").forEach((button) => {
     button.addEventListener("click", function () {
       const modalType = this.getAttribute("data-type");
@@ -41,5 +55,19 @@ document.addEventListener("DOMContentLoaded", function () {
         this.style.display = "none";
       }
     });
+  });
+
+  // Ouverture du modal de confirmation de suppression
+  document.querySelectorAll(".open-delete-modal").forEach((button) => {
+    button.addEventListener("click", function () {
+      const customerId = this.getAttribute("data-id");
+      document.getElementById("delete-id").value = customerId; // Définit l'ID du client dans le modal
+      document.getElementById("delete-modal").style.display = "block"; // Affiche le modal de confirmation
+    });
+  });
+
+  // Fermeture du modal de suppression spécifique avec le bouton 'Annuler'
+  document.querySelector(".close-modal").addEventListener("click", function () {
+    document.getElementById("delete-modal").style.display = "none"; // Cache le modal de suppression
   });
 });

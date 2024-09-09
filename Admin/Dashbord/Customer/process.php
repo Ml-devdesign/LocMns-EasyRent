@@ -86,21 +86,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
 
-    // Préparation de la Requête SQL préparée en fonction de la présence ou non d'un ID client
-    if (empty($customerId)) {
+        // Préparation de la Requête SQL préparée en fonction de la présence ou non d'un ID client
+        if (empty($customerId)) {
         // Création d'un nouveau client
         $sql = "INSERT INTO customer 
-                                (Customer_firstName, 
-                                Customer_lastName, 
-                                Customer_email, 
-                                Customer_password, 
-                                Customer_adress, 
-                                Customer_zipCode, 
-                                Customer_phoneNum, 
-                                Admin_booleen, 
-                                consent_date,
-                                deletion_date,
-                                Authorisation_id)
+                (Customer_firstName, 
+                Customer_lastName, 
+                Customer_email, 
+                Customer_password, 
+                Customer_adress, 
+                Customer_zipCode, 
+                Customer_phoneNum, 
+                Admin_booleen, 
+                consent_date,
+                deletion_date,
+                Authorisation_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $db->prepare($sql);
         $stmt->execute([
@@ -115,44 +115,76 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $consentDate,
             $deletionDate,
             $authId
-
         ]);
-        echo "Client créé avec succès.<br>";
+
+        // Récupérer l'ID du client nouvellement inséré
+        $customerId = $db->lastInsertId();
+
+        // Insertion dans la table 'consents'
+        $sqlConsent = "INSERT INTO consents (customer_id, consent_type, consent_given, consent_date) 
+                    VALUES (?, ?, ?, ?)";
+        $stmtConsent = $db->prepare($sqlConsent);
+        $stmtConsent->execute([$customerId, 'account_creation', 1, $consentDate]);
+
+        echo "Client et consentement créés avec succès.<br>";
+    }
+
     } else {
         // Mise à jour d'un client existant
             // requête préparée avec PDO pour éviter les injections SQL
             // Pourquoi c'est important : Les requêtes préparées permettent de lier les données en utilisant des "placeholders" (?) et empêchent l'injection de code malveillant dans votre requête SQL.
-        $sql = "UPDATE customer SET 
-                Customer_firstName = ?, 
-                Customer_lastName = ?, 
-                Customer_email = ?, 
-                Customer_password = ?, 
-                Customer_adress = ?, 
-                Customer_zipCode = ?, 
-                Customer_phoneNum = ?, 
-                Admin_booleen = ?, 
-                consent_date = ?,
-                deletion_date =?,
-                Authorisation_id = ?
-                WHERE Customer_id = ?";
-        $stmt = $db->prepare($sql);
-        $stmt->execute([
-            $firstName, 
-            $lastName, 
-            $email, 
-            $password, 
-            $adress, 
-            $zipCode, 
-            $phoneNum, 
-            $admin, 
-            $consentDate,   // consent_date avant deletion_date
-            $deletionDate,  // Ajoutez deletion_date avant Authorisation_id
-            $authId,        // Authorisation_id ici
-            $customerId     // Customer_id pour la clause WHERE
-        ]);
-        echo "Client mis à jour avec succès.<br>";
+       if (!empty($customerId)) {
+    // Mise à jour du client existant
+    $sql = "UPDATE customer SET 
+            Customer_firstName = ?, 
+            Customer_lastName = ?, 
+            Customer_email = ?, 
+            Customer_password = ?, 
+            Customer_adress = ?, 
+            Customer_zipCode = ?, 
+            Customer_phoneNum = ?, 
+            Admin_booleen = ?, 
+            consent_date = ?,
+            deletion_date =?,
+            Authorisation_id = ?
+            WHERE Customer_id = ?";
+    $stmt = $db->prepare($sql);
+    $stmt->execute([
+        $firstName, 
+        $lastName, 
+        $email, 
+        $password, 
+        $adress, 
+        $zipCode, 
+        $phoneNum, 
+        $admin, 
+        $consentDate, 
+        $deletionDate, 
+        $authId, 
+        $customerId
+    ]);
+
+    // Vérifier s'il existe déjà un consentement pour ce client
+    $sqlConsentCheck = "SELECT * FROM consents WHERE customer_id = ?";
+    $stmtConsentCheck = $db->prepare($sqlConsentCheck);
+    $stmtConsentCheck->execute([$customerId]);
+    $consentRecord = $stmtConsentCheck->fetch();
+
+    if ($consentRecord) {
+        // Mise à jour du consentement existant
+        $sqlUpdateConsent = "UPDATE consents SET consent_type = ?, consent_given = ?, consent_date = ? WHERE customer_id = ?";
+        $stmtUpdateConsent = $db->prepare($sqlUpdateConsent);
+        $stmtUpdateConsent->execute(['account_update', 1, $consentDate, $customerId]);
+    } else {
+        // Insertion d'un nouveau consentement si aucun n'existe
+        $sqlInsertConsent = "INSERT INTO consents (customer_id, consent_type, consent_given, consent_date) 
+                             VALUES (?, ?, ?, ?)";
+        $stmtInsertConsent = $db->prepare($sqlInsertConsent);
+        $stmtInsertConsent->execute([$customerId, 'account_update', 1, $consentDate]);
     }
 
+    echo "Client et consentement mis à jour avec succès.<br>";
+}
 
     // Redirection après succès
     header("Location:/Admin/index.php");
@@ -174,5 +206,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 //     $stmt = $db->prepare($sql);
 //     $stmt->execute([$_POST['customerId']]);
 //     echo "Client supprimé avec succès.<br>"; -->
-
 
